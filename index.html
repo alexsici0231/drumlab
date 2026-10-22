@@ -1,0 +1,77 @@
+<!doctype html>
+<html lang="ru">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+  <meta name="theme-color" content="#0b1020">
+  <meta name="description" content="Личный тюнер барабанов. Измерение частоты пластика, настройка у винтов и сохранение результатов — локально на вашем устройстве.">
+  <link rel="icon" type="image/png" href="./icons/icon-192.png">
+  <link rel="apple-touch-icon" href="./icons/icon-192.png">
+  <link rel="manifest" href="./manifest.webmanifest">
+  <link rel="stylesheet" href="./styles.css">
+  <title>DRUM LAB — личный тюнер</title>
+</head>
+<body>
+<div class="app-shell">
+  <header class="topbar">
+    <div class="brand" aria-label="DRUM LAB">
+      <span class="brand-mark" aria-hidden="true"><span></span><span></span><span></span><span></span><span></span></span>
+      <div class="brand-text"><strong>DRUM<span>LAB</span></strong><small>ЛИЧНЫЙ ТЮНЕР БАРАБАНОВ</small></div>
+    </div>
+    <span id="micStatus" class="mic-status" role="status"><span class="status-dot"></span>Микрофон выключен</span>
+  </header>
+
+  <main>
+    <div class="page-lead"><div><span class="eyebrow">НАСТРОЙКА БАРАБАНОВ</span><h1>Слышим точнее. <span>Настраиваем ровнее.</span></h1></div><span class="version-pill">BETA 1.0</span></div>
+
+    <section class="panel setup-panel" aria-labelledby="setupHeading">
+      <div class="section-title"><h2 id="setupHeading">01 <span>Выбор барабана</span></h2><span class="section-hint">Настройки сохраняются автоматически</span></div>
+      <div class="setup-grid">
+        <label class="input-stack"><span>Барабан</span><select id="drumSelect"></select></label>
+        <label class="input-stack"><span>Количество винтов</span><select id="lugsSelect"><option value="4">4 винта</option><option value="6">6 винтов</option><option value="8">8 винтов</option><option value="10">10 винтов</option><option value="12">12 винтов</option></select></label>
+      </div>
+      <div class="segments-row"><div class="segment-field"><span class="field-label">Пластик</span><div id="headSegments" class="segmented" role="group" aria-label="Пластик"><button type="button" data-value="batter" class="active">Ударный</button><button type="button" data-value="reso">Резонансный</button></div></div>
+      <div class="segment-field"><span class="field-label">Режим</span><div id="modeSegments" class="segmented" role="group" aria-label="Режим"><button type="button" data-value="lugs" class="active">У винтов</button><button type="button" data-value="center">По центру</button></div></div></div>
+    </section>
+
+    <section class="meter-panel panel" aria-labelledby="meterHeading">
+      <div class="meter-top"><h2 id="meterHeading">02 <span>Измерение частоты</span></h2><span id="qualityText" class="quality">Ожидает измерения</span></div>
+      <div class="freq-display"><div class="big-number"><span id="frequencyValue">—</span><span class="hz-label">Hz</span></div><div id="pitchNote" class="pitch-note">Нота: —</div></div>
+      <div id="readingFeedback" class="reading-feedback" aria-live="polite">Включите микрофон, затем легко ударьте по пластику.</div>
+      <div class="meter-ruler" role="img" aria-label="Отклонение от эталонной частоты"><div class="ruler-stripes"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></div><div class="ruler-center"></div><div id="needle" class="ruler-needle" style="left:50%"></div></div>
+      <div class="ruler-labels"><span id="lowLabel">НИЖЕ ЭТАЛОНА</span><span>ТОЧНО</span><span id="highLabel">ВЫШЕ ЭТАЛОНА</span></div>
+      <div class="main-actions"><button id="microphoneButton" class="primary-button" type="button"><span class="button-icon" aria-hidden="true">◉</span> Включить микрофон</button><button id="lockButton" class="secondary-button" type="button" disabled>⌁ Зафиксировать тон</button></div>
+      <div class="info-line"><span id="activityIcon" class="activity-pulse"></span><span id="activityText">Микрофон не активен</span></div>
+    </section>
+
+    <div class="work-grid">
+      <section class="panel drum-panel" aria-labelledby="drumHeading">
+        <div class="section-title"><h2 id="drumHeading">03 <span>Настройка по винтам</span></h2><span id="progressTag" class="section-hint">0 / 8 измерено</span></div>
+        <div id="drumInterface" class="drum-interface"><div id="drumCircle" class="drum-circle" aria-label="Схема винтов барабана"><div class="inner-ring"><div class="drum-inner-info"><span id="circleTitle">ВИНТ №1</span><b id="circleFrequency">—</b><span>Гц</span></div></div><div id="lugButtons" class="lug-buttons"></div></div></div>
+        <div id="centerModeDescription" class="mode-description" hidden>Для измерения общего строя установите барабан на стойку, не заглушая пластики, и легко ударьте в центр.</div>
+        <div class="readings-summary"><div><small>ЭТАЛОН</small><strong id="referenceValue">—</strong></div><div><small>РАЗБРОС ПО ВИНТАМ</small><strong id="spreadValue">—</strong></div><div><small>ДОПУСК</small><strong id="toleranceSummary">±2 Гц</strong></div></div>
+        <div id="lugReadings" class="lug-readings"></div>
+        <div class="panel-footer-actions"><label class="toggle"><input id="autoAdvance" type="checkbox"><span class="switch"></span><span>Переходить к следующему винту автоматически</span></label><button id="clearReadingsButton" type="button" class="text-button">Сбросить замеры пластика</button></div>
+      </section>
+
+      <div class="aside-stack">
+        <section class="panel controls-panel" aria-labelledby="controlsHeading"><div class="section-title"><h2 id="controlsHeading">04 <span>Точность и эталон</span></h2></div>
+          <label class="input-stack"><span>Целевая частота у винта (Гц)</span><div class="input-with-button"><input id="targetInput" type="number" min="30" max="1200" step="0.1" inputmode="decimal" placeholder="Не задана"><button type="button" id="targetFromCurrentButton" class="small-button" title="Использовать последний замер">Взять замер</button></div><small>Оставьте пустым, чтобы сравнивать винты с медианой измеренных значений.</small></label>
+          <div class="settings-pair"><label class="input-stack"><span>Допуск, ±Гц</span><input id="toleranceInput" type="number" min="0.5" max="20" step="0.5" inputmode="decimal" value="2"></label><label class="input-stack"><span>Диапазон анализа</span><select id="rangeSelect"><option value="auto">Автоматический</option><option value="low">Низкие (35–250 Гц)</option><option value="mid">Средние (100–500 Гц)</option><option value="high">Высокие (200–1000 Гц)</option><option value="wide">Полный (35–1000 Гц)</option></select></label></div>
+          <label class="input-stack slider-stack"><span>Чувствительность микрофона <b id="sensitivityValue">65%</b></span><input type="range" id="sensitivitySlider" min="10" max="100" value="65"><small>Если замеры не запускаются — увеличьте; если срабатывает от шума — уменьшите.</small></label>
+          <div class="filter-info"><span class="mini-icon">⌁</span><div><strong>Фильтр обертонов ±18%</strong><small id="filterText">Пока отключён. Зафиксируйте правильный тон, чтобы снизить риск скачков на обертоны.</small></div></div>
+        </section>
+
+        <section class="panel spectrum-panel" aria-labelledby="spectrumHeading"><div class="section-title"><h2 id="spectrumHeading">05 <span>Спектр сигнала</span></h2><span class="section-hint">Последний удар</span></div><canvas id="spectrum" height="150" aria-label="Спектр частот последнего удара"></canvas><div class="spectrum-axis"><span id="minSpectrumLabel">40 Hz</span><span id="maxSpectrumLabel">800 Hz</span></div><div class="candidate-title">ВОЗМОЖНЫЕ ЧАСТОТЫ <span>(нажмите, если определился обертон)</span></div><div id="peakChoices" class="peak-choices"><span class="empty-peaks">Пики появятся после первого удара</span></div></section>
+        <section class="panel data-panel"><div class="section-title"><h2>06 <span>Мои данные</span></h2></div><p>Настройки и частоты сохраняются только в этом браузере. Звук не записывается в файл и никуда не отправляется.</p><div class="data-actions"><button id="exportButton" type="button" class="secondary-button">↓ Экспорт JSON</button><button id="importButton" type="button" class="secondary-button">↑ Импорт</button><input id="importFile" type="file" accept=".json,application/json" hidden></div></section>
+      </div>
+    </div>
+
+    <section class="howto panel" aria-labelledby="howtoHeading"><h2 id="howtoHeading">Как пользоваться</h2><div class="howto-grid"><div><b>01</b><span>Выберите барабан и пластик. Заглушите второй пластик, если выравниваете винты.</span></div><div><b>02</b><span>Включите микрофон. Ударьте примерно в 2–3 см от выбранного винта.</span></div><div><b>03</b><span>Повторите измерения у каждого винта. Выравнивайте их по одной частоте, небольшими поворотами ключа.</span></div></div><p class="footnote">Это экспериментальный инструмент: спектральный пик не всегда совпадает с основным тоном барабана. Проверяйте результаты повторным ударом и на слух. Для получения общего тона используйте режим «По центру».</p></section>
+  </main>
+  <footer class="site-footer"><span>DRUM LAB · PRIVATE TUNER</span><span>Работает на устройстве · Без подписки</span></footer>
+</div>
+<div id="toast" class="toast" role="alert" aria-live="polite"></div>
+<script type="module" src="./app.js"></script>
+</body>
+</html>

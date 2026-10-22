@@ -1,0 +1,8 @@
+{
+  "name": "drumlab-personal",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "description": "Private offline-capable drum tuning PWA",
+  "scripts": {"test":"node --test tests/*.test.mjs"}
+}
