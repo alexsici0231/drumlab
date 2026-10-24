@@ -71,3 +71,19 @@ npm test
 - `capture-worklet.js` — считывание звука в аудиопотоке браузера.
 - `manifest.webmanifest`, `sw.js`, `icons/` — установка на домашний экран и офлайн-кэш.
 - `tests/` — автоматические тесты синтетических частот.
+
+
+## Personal kit / Worship presets (v1.1)
+
+The default kit is **12″ rack tom, 16″ floor tom, 20″ kick, and Ludwig 14″ × 8″ snare**. Other sizes remain accessible in a separate selector group; their prior measurements are retained.
+
+At the top of the interface choose one of three starting-point *lug-frequency* presets and click **«Применить к 4 барабанам»**. Only the top and bottom heads' target frequencies on those four drums are updated; saved readings, number of lugs, center targets, history and other drum profiles remain unchanged. Export/import JSON is still available for full backups (import replaces the existing data, so export first).
+
+These are approximate starting points, **not** promised exact target pitches for any particular shell, drumhead or room. The 16″/snare tuning from Elevation Worship is attributed to Vincent Baynard; its 13″ tom does **not** match the owner's 12″ tom, and the adapted 12″ target is not a published Elevation Worship setting. Likewise the 20″ kick target is sourced to the tune-bot tuning table, not Elevation Worship.
+
+Sources:
+- https://tune-bot.com/tuning-guide/
+- https://worshipdrummer.com/elevation-worship-drum-tuning/
+- https://support.remo.com/hc/en-us/articles/360052028852-Understanding-Drumhead-types-and-differences
+
+**Size warning:** A photographed Remo Ambassador Clear `BA-0313-00` is a 13″ head, not a 12″ head (`BA-0312-00`). On a 14″ snare, use a dedicated thin *snare-side* resonant head, not a standard Ambassador Clear tom resonant head.

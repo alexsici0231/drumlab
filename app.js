@@ -1,17 +1,6 @@
 import { analyzeDrumHit, noteForHz } from './dsp.js';
+import { DRUMS, KIT_DRUM_IDS, PRESETS, applyPresetTargets } from './kit.js';
 
-const DRUMS = [
-  {id:'kick22',label:'Бочка · 22″',type:'kick',lugs:10},
-  {id:'kick20',label:'Бочка · 20″',type:'kick',lugs:8},
-  {id:'snare14',label:'Малый барабан · 14″',type:'snare',lugs:10},
-  {id:'tom8',label:'Том · 8″',type:'tom',lugs:6},
-  {id:'tom10',label:'Том · 10″',type:'tom',lugs:6},
-  {id:'tom12',label:'Том · 12″',type:'tom',lugs:6},
-  {id:'tom13',label:'Том · 13″',type:'tom',lugs:6},
-  {id:'tom14',label:'Том · 14″',type:'tom',lugs:8},
-  {id:'tom16',label:'Том · 16″',type:'tom',lugs:8},
-  {id:'other',label:'Другой барабан',type:'tom',lugs:8}
-];
 const DB_KEY='drumlab-personal-v1';
 const $=id=>document.getElementById(id);
 const dom = Object.fromEntries([
@@ -21,10 +10,10 @@ const dom = Object.fromEntries([
   'referenceValue','spreadValue','toleranceSummary','autoAdvance','clearReadingsButton','targetInput',
   'targetFromCurrentButton','toleranceInput','rangeSelect','sensitivitySlider','sensitivityValue',
   'filterText','spectrum','peakChoices','minSpectrumLabel','maxSpectrumLabel','exportButton',
-  'importButton','importFile','toast'
+  'importButton','importFile','presetSelect','applyPresetButton','presetPreview','presetDescription','presetStatus','toast'
 ].map(id=>[id,$(id)]));
 const state={
-  db:loadDb(),drumId:'tom12',head:'batter',mode:'lugs',selectedLug:0,micOn:false,
+  db:loadDb(),drumId:'tom12',selectedPreset:'worship-deep',head:'batter',mode:'lugs',selectedLug:0,micOn:false,
   stream:null,ctx:null,nodes:[],latest:null,spectrum:null,lockedHz:null,
   noiseRms:.001,capture:null,cooldownUntil:0,processing:false,toastTimer:0,
   lastMeasurementContext:null
@@ -89,6 +78,28 @@ function toast(message){
   dom.toast.classList.add('show');
   clearTimeout(state.toastTimer);
   state.toastTimer=setTimeout(()=>dom.toast.classList.remove('show'),3800);
+}
+function renderPresetPreview(){
+  const preset=PRESETS.find(p=>p.id===state.selectedPreset) || PRESETS[0];
+  dom.presetSelect.value=preset.id;
+  dom.presetDescription.textContent=preset.description;
+  dom.presetPreview.replaceChildren();
+  for(const drumId of KIT_DRUM_IDS){
+    const drum=DRUMS.find(d=>d.id===drumId);
+    const [top,bottom]=preset.values[drumId];
+    const row=document.createElement('div');
+    row.className='preset-drum';
+    const name=document.createElement('span');name.textContent=drum.label;
+    const topValue=document.createElement('strong');topValue.textContent=`${top} Гц`;
+    const bottomValue=document.createElement('strong');bottomValue.textContent=`${bottom} Гц`;
+    row.append(name,topValue,bottomValue);
+    dom.presetPreview.append(row);
+  }
+  const matched=KIT_DRUM_IDS.every(id=>{
+    const profile=state.db.profiles[id];
+    return profile?.heads?.batter?.target===preset.values[id][0]&&profile?.heads?.reso?.target===preset.values[id][1];
+  });
+  dom.presetStatus.textContent=matched?'Пресет установлен · измерения сохранены':'Частоты появятся в поле «Целевая частота» после применения';
 }
 function updateSegment(id,value){
   for(const btn of dom[id].querySelectorAll('button')){
@@ -171,6 +182,7 @@ function render(){
   renderLugs(ref);
   renderSpectrum();
   renderCandidates();
+  renderPresetPreview();
 }
 function updateFeedback(ref){
   if(!state.latest){
@@ -423,6 +435,15 @@ async function stopMic(){
   render();
 }
 function initEvents(){
+  dom.presetSelect.addEventListener('change',e=>{state.selectedPreset=e.target.value;renderPresetPreview();});
+  dom.applyPresetButton.addEventListener('click',()=>{
+    try {
+      const preset=applyPresetTargets(state.db.profiles,state.selectedPreset);
+      state.db.prefs.lastPreset=preset.id;
+      persist();updateTargetControl();render();
+      toast(`Пресет «${preset.label}» применён. Измерения не удалены.`);
+    } catch(err){toast(`Не получилось применить пресет: ${err.message}`);}
+  });
   dom.drumSelect.addEventListener('change',e=>{state.drumId=e.target.value;getProfile();persist();changeContext();});
   dom.lugsSelect.addEventListener('change',e=>{
     const profile=getProfile(),count=Number(e.target.value);
@@ -487,6 +508,7 @@ function initEvents(){
       if(!confirm('Заменить текущие настройки данными из резервной копии?'))return;
       state.db={version:1,profiles:obj.profiles,prefs:{sensitivity:65,tolerance:2,autoAdvance:false,range:'auto',...obj.prefs},history:Array.isArray(obj.history)?obj.history.slice(0,40):[]};
       state.drumId=DRUMS.some(d=>d.id===state.db.prefs.lastDrum)?state.db.prefs.lastDrum:'tom12';
+      state.selectedPreset=PRESETS.some(p=>p.id===state.db.prefs.lastPreset)?state.db.prefs.lastPreset:'worship-deep';
       getProfile();persist();changeContext();toast('Резервная копия импортирована.');
     }catch(err){toast(`Импорт не выполнен: ${err.message}`);}
     finally{e.target.value='';}
@@ -500,8 +522,20 @@ function initEvents(){
   });
 }
 function init(){
+  const mainGroup=document.createElement('optgroup');mainGroup.label='Мой комплект';
+  const extraGroup=document.createElement('optgroup');extraGroup.label='Дополнительные размеры';
   for(const drum of DRUMS){
-    const o=document.createElement('option');o.value=drum.id;o.textContent=drum.label;dom.drumSelect.append(o);
+    const o=document.createElement('option');o.value=drum.id;o.textContent=drum.label;
+    (drum.primary?mainGroup:extraGroup).append(o);
+  }
+  dom.drumSelect.append(mainGroup,extraGroup);
+  for(const preset of PRESETS){
+    const o=document.createElement('option');o.value=preset.id;o.textContent=preset.label;dom.presetSelect.append(o);
+  }
+  state.selectedPreset=PRESETS.some(p=>p.id===state.db.prefs.lastPreset)?state.db.prefs.lastPreset:'worship-deep';
+  if(!state.db.prefs.kitConfigured){
+    if(!KIT_DRUM_IDS.includes(state.db.prefs.lastDrum))state.db.prefs.lastDrum='tom12';
+    state.db.prefs.kitConfigured=true;
   }
   state.drumId=DRUMS.some(d=>d.id===state.db.prefs.lastDrum)?state.db.prefs.lastDrum:'tom12';
   state.db.prefs.sensitivity=Number(state.db.prefs.sensitivity)||65;

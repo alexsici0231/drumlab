@@ -1,6 +1,6 @@
 {
   "name": "drumlab-personal",
-  "version": "1.0.0",
+  "version": "1.1.0",
   "private": true,
   "type": "module",
   "description": "Private offline-capable drum tuning PWA",

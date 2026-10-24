@@ -22,13 +22,26 @@
   </header>
 
   <main>
-    <div class="page-lead"><div><span class="eyebrow">НАСТРОЙКА БАРАБАНОВ</span><h1>Слышим точнее. <span>Настраиваем ровнее.</span></h1></div><span class="version-pill">BETA 1.0</span></div>
+    <div class="page-lead"><div><span class="eyebrow">НАСТРОЙКА БАРАБАНОВ</span><h1>Слышим точнее. <span>Настраиваем ровнее.</span></h1></div><span class="version-pill">BETA 1.1</span></div>
 
     <section class="panel setup-panel" aria-labelledby="setupHeading">
       <div class="section-title"><h2 id="setupHeading">01 <span>Выбор барабана</span></h2><span class="section-hint">Настройки сохраняются автоматически</span></div>
       <div class="setup-grid">
         <label class="input-stack"><span>Барабан</span><select id="drumSelect"></select></label>
         <label class="input-stack"><span>Количество винтов</span><select id="lugsSelect"><option value="4">4 винта</option><option value="6">6 винтов</option><option value="8">8 винтов</option><option value="10">10 винтов</option><option value="12">12 винтов</option></select></label>
+      </div>
+      <div class="preset-box" aria-label="Готовые настройки Worship">
+        <div class="preset-heading"><strong>Готовый строй для твоего комплекта</strong><span>Все значения — у винтов, Гц</span></div>
+        <div class="preset-actions">
+          <label class="input-stack"><span>Музыкальный стиль</span><select id="presetSelect" aria-label="Выберите пресет"></select></label>
+          <button id="applyPresetButton" class="preset-apply" type="button">Применить к 4 барабанам</button>
+        </div>
+        <p id="presetDescription" class="preset-description">Начальные частоты для настройки барабанов.</p>
+        <details class="preset-details"><summary>Посмотреть частоты всех четырёх барабанов</summary>
+          <div class="preset-table"><div class="preset-table-head"><span>Барабан</span><span>Ударный</span><span>Резонансный</span></div><div id="presetPreview"></div></div>
+        </details>
+        <p id="presetStatus" class="preset-status">После применения заполнятся целевые частоты.</p>
+        <p class="preset-safety">Пресет изменяет только цели по Гц — твои измерения, количество винтов и данные других размеров не удаляются. Это стартовые значения, а не обязательный строй.</p>
       </div>
       <div class="segments-row"><div class="segment-field"><span class="field-label">Пластик</span><div id="headSegments" class="segmented" role="group" aria-label="Пластик"><button type="button" data-value="batter" class="active">Ударный</button><button type="button" data-value="reso">Резонансный</button></div></div>
       <div class="segment-field"><span class="field-label">Режим</span><div id="modeSegments" class="segmented" role="group" aria-label="Режим"><button type="button" data-value="lugs" class="active">У винтов</button><button type="button" data-value="center">По центру</button></div></div></div>
@@ -63,11 +76,11 @@
         </section>
 
         <section class="panel spectrum-panel" aria-labelledby="spectrumHeading"><div class="section-title"><h2 id="spectrumHeading">05 <span>Спектр сигнала</span></h2><span class="section-hint">Последний удар</span></div><canvas id="spectrum" height="150" aria-label="Спектр частот последнего удара"></canvas><div class="spectrum-axis"><span id="minSpectrumLabel">40 Hz</span><span id="maxSpectrumLabel">800 Hz</span></div><div class="candidate-title">ВОЗМОЖНЫЕ ЧАСТОТЫ <span>(нажмите, если определился обертон)</span></div><div id="peakChoices" class="peak-choices"><span class="empty-peaks">Пики появятся после первого удара</span></div></section>
-        <section class="panel data-panel"><div class="section-title"><h2>06 <span>Мои данные</span></h2></div><p>Настройки и частоты сохраняются только в этом браузере. Звук не записывается в файл и никуда не отправляется.</p><div class="data-actions"><button id="exportButton" type="button" class="secondary-button">↓ Экспорт JSON</button><button id="importButton" type="button" class="secondary-button">↑ Импорт</button><input id="importFile" type="file" accept=".json,application/json" hidden></div></section>
+        <section class="panel data-panel"><div class="section-title"><h2>06 <span>Мои данные</span></h2></div><p>Настройки и замеры хранятся на этом устройстве. Экспорт сохраняет резервную копию; импорт заменяет сохранённые настройки целиком. Пресеты выше меняют только целевые Hz. Звук никуда не отправляется.</p><div class="data-actions"><button id="exportButton" type="button" class="secondary-button">↓ Экспорт JSON</button><button id="importButton" type="button" class="secondary-button">↑ Импорт</button><input id="importFile" type="file" accept=".json,application/json" hidden></div></section>
       </div>
     </div>
 
-    <section class="howto panel" aria-labelledby="howtoHeading"><h2 id="howtoHeading">Как пользоваться</h2><div class="howto-grid"><div><b>01</b><span>Выберите барабан и пластик. Заглушите второй пластик, если выравниваете винты.</span></div><div><b>02</b><span>Включите микрофон. Ударьте примерно в 2–3 см от выбранного винта.</span></div><div><b>03</b><span>Повторите измерения у каждого винта. Выравнивайте их по одной частоте, небольшими поворотами ключа.</span></div></div><p class="footnote">Это экспериментальный инструмент: спектральный пик не всегда совпадает с основным тоном барабана. Проверяйте результаты повторным ударом и на слух. Для получения общего тона используйте режим «По центру».</p></section>
+    <section class="howto panel" aria-labelledby="howtoHeading"><h2 id="howtoHeading">Как пользоваться</h2><div class="howto-grid"><div><b>01</b><span>Выберите барабан и пластик. Заглушите второй пластик, если выравниваете винты.</span></div><div><b>02</b><span>Включите микрофон. Ударьте примерно в 2–3 см от выбранного винта.</span></div><div><b>03</b><span>Повторите измерения у каждого винта. Выравнивайте их по одной частоте, небольшими поворотами ключа.</span></div></div><p class="footnote">Это экспериментальный инструмент: спектральный пик не всегда совпадает с основным тоном барабана. Проверяйте результаты повторным ударом и на слух. Для получения общего тона используйте режим «По центру». Для малого барабана используйте специальный тонкий резонансный пластик Snare Side (не обычный Ambassador Clear).</p></section>
   </main>
   <footer class="site-footer"><span>DRUM LAB · PRIVATE TUNER</span><span>Работает на устройстве · Без подписки</span></footer>
 </div>
