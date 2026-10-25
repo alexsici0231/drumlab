@@ -62,10 +62,10 @@ jobs:
       - name: Sign AAB if owner has configured all signing secrets
         id: sign
         env:
-          KEYSTORE_B64: \${{ secrets.DRUMLAB_UPLOAD_KEYSTORE_B64 }}
-          KEYSTORE_PASSWORD: \${{ secrets.DRUMLAB_KEYSTORE_PASSWORD }}
-          KEY_ALIAS: \${{ secrets.DRUMLAB_KEY_ALIAS }}
-          KEY_PASSWORD: \${{ secrets.DRUMLAB_KEY_PASSWORD }}
+          KEYSTORE_B64: ${{ secrets.DRUMLAB_UPLOAD_KEYSTORE_B64 }}
+          KEYSTORE_PASSWORD: ${{ secrets.DRUMLAB_KEYSTORE_PASSWORD }}
+          KEY_ALIAS: ${{ secrets.DRUMLAB_KEY_ALIAS }}
+          KEY_PASSWORD: ${{ secrets.DRUMLAB_KEY_PASSWORD }}
         run: |
           if [[ -z "$KEYSTORE_B64" || -z "$KEYSTORE_PASSWORD" || -z "$KEY_ALIAS" || -z "$KEY_PASSWORD" ]]; then
             echo "No signing secrets: skipping signed AAB."
