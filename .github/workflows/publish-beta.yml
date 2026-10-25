@@ -1,0 +1,47 @@
+name: Publish DRUM LAB beta APK
+on:
+  workflow_dispatch:
+  push:
+    branches: [main]
+    paths:
+      - '.github/workflows/publish-beta.yml'
+
+permissions:
+  contents: write
+  actions: read
+
+jobs:
+  release-beta:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - name: Download APK from successful Android CI build
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          mkdir -p "$RUNNER_TEMP/drumlab"
+          gh run download 40221195310 \
+            --repo "$GITHUB_REPOSITORY" \
+            --name drumlab-debug-apk \
+            --dir "$RUNNER_TEMP/drumlab"
+          APK="$(find "$RUNNER_TEMP/drumlab" -type f -name '*.apk' | head -n 1)"
+          test -n "$APK" && test -s "$APK"
+          unzip -t "$APK" > /dev/null
+          cp "$APK" DRUM_LAB_v1.2_Beta_Android.apk
+          sha256sum DRUM_LAB_v1.2_Beta_Android.apk
+
+      - name: Publish a downloadable prerelease asset
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          if gh release view v1.2-beta --repo "$GITHUB_REPOSITORY" >/dev/null 2>&1; then
+            gh release upload v1.2-beta DRUM_LAB_v1.2_Beta_Android.apk \
+              --repo "$GITHUB_REPOSITORY" --clobber
+          else
+            gh release create v1.2-beta DRUM_LAB_v1.2_Beta_Android.apk \
+              --repo "$GITHUB_REPOSITORY" \
+              --target "$GITHUB_SHA" \
+              --title 'DRUM LAB v1.2 Beta — Android' \
+              --notes 'Test APK for DRUM LAB. Debug-signed build for sideload testing only, NOT an official Google Play release. Drum frequency measurement accuracy has not yet been verified on physical devices.' \
+              --prerelease
+          fi
