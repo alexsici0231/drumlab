@@ -1,0 +1,12 @@
+node_modules/
+www/
+android/
+.gradle/
+*.apk
+*.aab
+*.jks
+*.keystore
+*.pem
+.env
+*.log
+.DS_Store
