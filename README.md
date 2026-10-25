@@ -1,3 +1,16 @@
+# Android beta 1.2 — DRUM LAB for Google Play
+
+The Android release preparation uses Capacitor 8 (Android API 36) with local bundled HTML, JS, CSS and microphone access.
+
+- [Android build workflow](.github/workflows/android.yml): debug APK artifact after success.
+- [Google Play checklist](docs/GOOGLE_PLAY_CHECKLIST_RU.md)
+- [Android build and signing guide](docs/ANDROID_BUILD_RU.md)
+- [Privacy policy](privacy.html)
+
+Note: debug APK is a test build, not a signed Google Play release. Test on real drums and devices before publication.
+
+---
+
 # DRUM LAB — личный тюнер барабанов
 
 Рабочий прототип мобильного веб-приложения (PWA) на русском языке. Не требует регистрации, рекламы, подписки, сервера или внешних библиотек. Исходный код открыт и находится в файлах этой папки.
