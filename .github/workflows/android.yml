@@ -1,0 +1,90 @@
+name: Android build / DRUM LAB
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [main]
+    paths:
+      - '.github/workflows/android.yml'
+      - 'scripts/**'
+      - 'capacitor.config.json'
+      - 'package.json'
+      - 'index.html'
+      - 'privacy.html'
+      - 'app.js'
+      - 'kit.js'
+      - 'dsp.js'
+      - 'styles.css'
+      - 'capture-worklet.js'
+      - 'manifest.webmanifest'
+      - 'sw.js'
+      - 'icons/**'
+      - 'tests/**'
+
+permissions:
+  contents: read
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    timeout-minutes: 40
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '21'
+      - uses: android-actions/setup-android@v3
+      - name: Install Android 16 SDK
+        run: sdkmanager 'platforms;android-36' 'build-tools;36.0.0'
+      - name: Install Capacitor 8 dependencies
+        run: npm install --no-audit --no-fund
+      - name: Test code and package web assets
+        run: npm test && npm run build:web
+      - name: Generate native Android project
+        run: npx cap add android && npx cap sync android
+      - name: Configure microphone permissions and launcher
+        run: |
+          python3 -m pip install --quiet --user pillow
+          python3 scripts/configure_android.py
+      - name: Compile test APK and unsigned Play bundle
+        working-directory: android
+        run: ./gradlew --no-daemon assembleDebug bundleRelease
+      - name: Upload debug APK
+        uses: actions/upload-artifact@v4
+        with:
+          name: drumlab-debug-apk
+          path: android/app/build/outputs/apk/debug/app-debug.apk
+          if-no-files-found: error
+      - name: Sign AAB if owner has configured all signing secrets
+        id: sign
+        env:
+          KEYSTORE_B64: \${{ secrets.DRUMLAB_UPLOAD_KEYSTORE_B64 }}
+          KEYSTORE_PASSWORD: \${{ secrets.DRUMLAB_KEYSTORE_PASSWORD }}
+          KEY_ALIAS: \${{ secrets.DRUMLAB_KEY_ALIAS }}
+          KEY_PASSWORD: \${{ secrets.DRUMLAB_KEY_PASSWORD }}
+        run: |
+          if [[ -z "$KEYSTORE_B64" || -z "$KEYSTORE_PASSWORD" || -z "$KEY_ALIAS" || -z "$KEY_PASSWORD" ]]; then
+            echo "No signing secrets: skipping signed AAB."
+            exit 0
+          fi
+          umask 077
+          printf '%s' "$KEYSTORE_B64" | base64 --decode > "$RUNNER_TEMP/drumlab-upload.jks"
+          jarsigner -keystore "$RUNNER_TEMP/drumlab-upload.jks" -storepass "$KEYSTORE_PASSWORD" \
+            -keypass "$KEY_PASSWORD" -signedjar "$RUNNER_TEMP/drumlab-play-upload.aab" \
+            android/app/build/outputs/bundle/release/app-release.aab "$KEY_ALIAS"
+          jarsigner -verify "$RUNNER_TEMP/drumlab-play-upload.aab"
+          mkdir -p android/app/build/outputs/signed
+          cp "$RUNNER_TEMP/drumlab-play-upload.aab" android/app/build/outputs/signed/drumlab-play-upload.aab
+          rm -f "$RUNNER_TEMP/drumlab-upload.jks"
+          echo "signed=true" >> "$GITHUB_OUTPUT"
+      - name: Upload signed Play bundle
+        if: steps.sign.outputs.signed == 'true'
+        uses: actions/upload-artifact@v4
+        with:
+          name: drumlab-signed-aab
+          path: android/app/build/outputs/signed/drumlab-play-upload.aab
+          if-no-files-found: error
