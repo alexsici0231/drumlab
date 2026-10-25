@@ -1,6 +1,6 @@
 /* Simple offline shell; microphones require HTTPS and initial permission. */
-const CACHE='drumlab-static-v2';
-const ASSETS=['./','./index.html','./styles.css','./app.js','./kit.js','./dsp.js','./capture-worklet.js','./manifest.webmanifest','./icons/icon-192.png','./icons/icon-512.png'];
+const CACHE='drumlab-static-v3';
+const ASSETS=['./','./index.html','./privacy.html','./styles.css','./app.js','./kit.js','./dsp.js','./capture-worklet.js','./manifest.webmanifest','./icons/icon-192.png','./icons/icon-512.png'];
 self.addEventListener('install',e=>{
   e.waitUntil(caches.open(CACHE).then(cache=>cache.addAll(ASSETS)).then(()=>self.skipWaiting()));
 });
