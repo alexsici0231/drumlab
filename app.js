@@ -515,7 +515,9 @@ function initEvents(){
   });
   window.addEventListener('resize',renderSpectrum);
   document.addEventListener('visibilitychange',()=>{
-    if(!document.hidden&&state.micOn&&state.ctx?.state==='suspended')state.ctx.resume().catch(()=>{});
+    // Stop capturing when the user switches away from the app.
+    if(document.hidden&&state.micOn)stopMic().catch(()=>{});
+    else if(!document.hidden&&state.micOn&&state.ctx?.state==='suspended')state.ctx.resume().catch(()=>{});
   });
   window.addEventListener('pagehide',()=>{
     if(state.stream)state.stream.getTracks().forEach(t=>t.stop());
@@ -542,7 +544,7 @@ function init(){
   state.db.prefs.sensitivity=Math.max(10,Math.min(100,state.db.prefs.sensitivity));
   if(!['auto','low','mid','high','wide'].includes(state.db.prefs.range))state.db.prefs.range='auto';
   getProfile();initEvents();updateTargetControl();render();
-  if('serviceWorker' in navigator&&location.protocol==='https:'){
+  if('serviceWorker' in navigator&&location.protocol==='https:'&&!(window.Capacitor?.isNativePlatform?.())){
     navigator.serviceWorker.register('./sw.js').catch(err=>console.warn('Offline cache:',err));
   }
 }
