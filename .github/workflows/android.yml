@@ -37,9 +37,11 @@ jobs:
         with:
           distribution: temurin
           java-version: '21'
-      - uses: android-actions/setup-android@v3
       - name: Install Android 16 SDK
-        run: sdkmanager 'platforms;android-36' 'build-tools;36.0.0'
+        run: |
+          SDKMANAGER=$(find "$ANDROID_HOME/cmdline-tools" -type f -name sdkmanager | head -n 1)
+          if [[ -z "$SDKMANAGER" ]]; then echo "sdkmanager is not installed"; exit 1; fi
+          "$SDKMANAGER" 'platforms;android-36' 'build-tools;36.0.0'
       - name: Install Capacitor 8 dependencies
         run: npm install --no-audit --no-fund
       - name: Test code and package web assets
