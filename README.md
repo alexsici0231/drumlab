@@ -1,6 +1,6 @@
 # Android beta 1.2 — DRUM LAB for Google Play
 
-The Android release preparation uses Capacitor 8 (Android API 36) with local bundled HTML, JS, CSS and microphone access.
+✅ Verified Android CI: https://github.com/alexsici0231/drumlab/actions/runs/40221195310 — Android build succeeded on October 25, 2026. Download artifact **drumlab-debug-apk** for personal testing. A signed Play Store AAB is not yet available because signing keys have not been configured.\n\nThe Android release preparation uses Capacitor 8 (Android API 36) with local bundled HTML, JS, CSS and microphone access.
 
 - [Android build workflow](.github/workflows/android.yml): debug APK artifact after success.
 - [Google Play checklist](docs/GOOGLE_PLAY_CHECKLIST_RU.md)
