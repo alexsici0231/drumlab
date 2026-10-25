@@ -1,0 +1,8 @@
+{
+  "appId": "com.alexsici0231.drumlab",
+  "appName": "DRUM LAB",
+  "webDir": "www",
+  "android": {
+    "backgroundColor": "#0b1020"
+  }
+}
